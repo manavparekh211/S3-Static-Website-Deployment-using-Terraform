@@ -1,89 +1,34 @@
-# 🚀 Terraform on AWS: Infrastructure as Code Guide
+# 🌐 S3 Static Website Deployment
 
-> **Deploy cloud infrastructure with confidence using Terraform and AWS**
-
----
-
-## 📋 Table of Contents
-
-- [Overview](#overview)
-- [Prerequisites](#prerequisites)
-- [Getting Started](#getting-started)
-- [Project Structure](#project-structure)
-- [Configuration Examples](#configuration-examples)
-- [Deployment](#deployment)
-- [Best Practices](#best-practices)
-- [Troubleshooting](#troubleshooting)
-- [Resources](#resources)
+A complete Terraform infrastructure-as-code solution for deploying and hosting a static website on **AWS S3** with production-ready configurations.
 
 ---
 
-## 🎯 Overview
+## 📋 Project Overview
 
-This guide demonstrates how to use **Terraform** to provision and manage AWS infrastructure as code. Terraform enables you to define, preview, and deploy cloud infrastructure using declarative configuration files.
+This project demonstrates a modern DevOps approach to infrastructure management, leveraging Terraform to provision AWS resources for a highly available, scalable static website hosting solution.
 
-### Key Benefits
-✅ Infrastructure as Code (IaC)  
-✅ Version control for infrastructure  
-✅ Reproducible deployments  
-✅ Easy scaling and updates  
-✅ Cost optimization visibility  
+**Key Features:**
+- ✅ Infrastructure as Code (IaC) with Terraform
+- ✅ AWS S3 bucket configuration for static website hosting
+- ✅ Automated resource provisioning and management
+- ✅ State management with Terraform state files
+- ✅ Multi-provider support (AWS, Random)
+- ✅ Organized outputs for easy resource reference
 
 ---
 
-## 📦 Prerequisites
+## 🏗️ Architecture
 
-Before you begin, ensure you have:
-
-- **Terraform** (v1.0+) - [Download](https://www.terraform.io/downloads.html)
-- **AWS Account** with appropriate permissions
-- **AWS CLI** configured with credentials
-- **Git** for version control
-- **Text Editor** (VS Code recommended)
-
-```bash
-# Verify installations
-terraform -v
-aws --version
 ```
-
----
-
-## 🔧 Getting Started
-
-### 1. Initialize Your Terraform Project
-
-```bash
-mkdir terraform-aws-project
-cd terraform-aws-project
-terraform init
-```
-
-### 2. Configure AWS Credentials
-
-```bash
-aws configure
-# Enter your AWS Access Key ID and Secret Access Key
-```
-
-### 3. Create Your First Configuration
-
-Create a `main.tf` file:
-
-```hcl
-terraform {
-  required_version = ">= 1.0"
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 5.0"
-    }
-  }
-}
-
-provider "aws" {
-  region = var.aws_region
-}
+┌─────────────────────────────────────────┐
+│      AWS S3 Static Website Hosting      │
+├─────────────────────────────────────────┤
+│  • S3 Bucket Configuration              │
+│  • Index & Error Document Handling      │
+│  • Website Endpoint Exposure            │
+│  • HTML Asset Storage                   │
+└─────────────────────────────────────────┘
 ```
 
 ---
@@ -91,192 +36,157 @@ provider "aws" {
 ## 📁 Project Structure
 
 ```
-terraform-aws-project/
-├── main.tf              # Primary configuration
-├── variables.tf         # Input variables
-├── outputs.tf           # Output values
-├── terraform.tfvars     # Variable values
-├── vpc.tf               # VPC configuration
-├── security_groups.tf   # Security groups
-├── instances.tf         # EC2 instances
-├── s3.tf                # S3 buckets
-└── .terraform/          # Terraform working directory
+s3-static-website/
+├── .gitignore             # Git ignore rules for Terraform
+├── providers.tf           # AWS & Random provider configuration
+├── s3.tf                  # S3 bucket and website setup
+├── outputs.tf             # Output values for deployed resources
+├── .terraform.lock.hcl    # Terraform dependency lock file
+├── .terraform/            # Cached providers (not committed)
+├── terraform.tfstate      # Infrastructure state (not committed)
+├── terraform.tfstate.backup # State backup (not committed)
+└── html-files/
+    ├── index.html         # Main website page
+    └── error.html         # Error page (404, etc.)
 ```
 
 ---
 
-## 💻 Configuration Examples
+## 🚀 Quick Start
 
-### EC2 Instance
+### Prerequisites
+- [Terraform](https://www.terraform.io/downloads.html) >= 1.0
+- [AWS Account](https://aws.amazon.com/) with appropriate IAM permissions
+- AWS CLI configured with credentials
 
-```hcl
-resource "aws_instance" "web_server" {
-  ami           = data.aws_ami.ubuntu.id
-  instance_type = var.instance_type
-  key_name      = aws_key_pair.deployer.key_name
+### Installation & Deployment
 
-  tags = {
-    Name = "web-server"
-  }
-}
-```
+1. **Clone or navigate to the project directory:**
+   ```bash
+   cd s3-static-website
+   ```
 
-### S3 Bucket
+2. **Initialize Terraform:**
+   ```bash
+   terraform init
+   ```
 
-```hcl
-resource "aws_s3_bucket" "app_bucket" {
-  bucket = "my-app-bucket-${data.aws_caller_identity.current.account_id}"
+3. **Preview the infrastructure changes:**
+   ```bash
+   terraform plan
+   ```
 
-  tags = {
-    Name        = "app-bucket"
-    Environment = var.environment
-  }
-}
-```
+4. **Deploy the infrastructure:**
+   ```bash
+   terraform apply
+   ```
 
-### VPC & Subnet
-
-```hcl
-resource "aws_vpc" "main" {
-  cidr_block           = "10.0.0.0/16"
-  enable_dns_hostnames = true
-
-  tags = {
-    Name = "main-vpc"
-  }
-}
-
-resource "aws_subnet" "public" {
-  vpc_id            = aws_vpc.main.id
-  cidr_block        = "10.0.1.0/24"
-  availability_zone = data.aws_availability_zones.available.names[0]
-
-  tags = {
-    Name = "public-subnet"
-  }
-}
-```
+5. **Access your website:**
+   - Retrieve the S3 website endpoint from outputs
+   - Your static site is now live! 🎉
 
 ---
 
-## 🚀 Deployment
+## 📤 Key Outputs
 
-### Plan Your Infrastructure
+Once deployed, Terraform outputs important resource information:
 
+- **S3 Bucket Name** - Your bucket identifier
+- **Website Endpoint** - Public URL for your static website
+- **Region** - AWS region where resources are deployed
+
+View outputs anytime:
 ```bash
-# Review what Terraform will create
-terraform plan -out=tfplan
-```
-
-### Apply Configuration
-
-```bash
-# Create/update infrastructure
-terraform apply tfplan
-```
-
-### View Outputs
-
-```bash
-# Display output values
 terraform output
 ```
 
-### Destroy Infrastructure
+---
 
+## 🔧 Configuration Files Explained
+
+### `providers.tf`
+Configures AWS and Random providers for resource provisioning.
+
+### `s3.tf`
+Defines the S3 bucket configuration:
+- Bucket creation and naming
+- Static website hosting setup
+- Index document specification (index.html)
+- Error document handling (error.html)
+
+### `outputs.tf`
+Exposes critical resource attributes for easy reference and integration.
+
+---
+
+## 📝 HTML Files
+
+**`index.html`** - Your main website landing page
+**`error.html`** - Custom error page for HTTP errors (404, 403, etc.)
+
+---
+
+## 🔐 Best Practices Implemented
+
+- ✅ Provider versioning with lock file
+- ✅ Clear output definitions
+- ✅ Modular file organization
+- ✅ AWS best practices for S3 hosting
+- ✅ Proper version control with .gitignore
+
+---
+
+## 🔒 Version Control
+
+**Committed to Git:**
+- Configuration files (*.tf)
+- HTML assets
+- .terraform.lock.hcl (dependency lock)
+- .gitignore
+
+**Excluded from Git (.gitignore):**
+- *.tfstate files (contain sensitive data)
+- .terraform/ directory (regenerated on init)
+- *.tfvars files (may contain secrets)
+
+---
+
+## 🧹 Cleanup
+
+To remove all deployed resources:
 ```bash
-# Remove all resources (use with caution!)
 terraform destroy
 ```
 
 ---
 
-## ⭐ Best Practices
+## 📊 Tech Stack
 
-### 1. **State Management**
-```hcl
-terraform {
-  backend "s3" {
-    bucket         = "terraform-state-bucket"
-    key            = "prod/terraform.tfstate"
-    region         = "us-east-1"
-    encrypt        = true
-    dynamodb_table = "terraform-locks"
-  }
-}
-```
-
-### 2. **Variables**
-```hcl
-variable "environment" {
-  description = "Environment name"
-  type        = string
-  default     = "dev"
-}
-
-variable "instance_count" {
-  description = "Number of instances"
-  type        = number
-  default     = 1
-}
-```
-
-### 3. **Outputs**
-```hcl
-output "instance_public_ip" {
-  description = "Public IP of the instance"
-  value       = aws_instance.web_server.public_ip
-  sensitive   = false
-}
-```
-
-### 4. **General Guidelines**
-- ✅ Use remote state for team collaboration
-- ✅ Implement state locking to prevent conflicts
-- ✅ Use workspaces for multiple environments
-- ✅ Keep credentials in `.tfvars` (never commit to Git)
-- ✅ Use meaningful `tags` for resource organization
-- ✅ Enable S3 versioning for state backups
-- ✅ Use `terraform fmt` to format code
-- ✅ Run `terraform validate` before deployment
+| Tool | Version | Purpose |
+|------|---------|---------|
+| **Terraform** | Latest | Infrastructure as Code |
+| **AWS Provider** | 4.67.0 | Cloud Infrastructure |
+| **Random Provider** | 3.8.1 | Resource Naming |
 
 ---
 
-## 🐛 Troubleshooting
+## 💡 Tips & Tricks
 
-### Invalid Credentials
-```
-Error: Error configuring the AWS Provider
-```
-**Solution:** Run `aws configure` and verify your credentials
-
-### State Lock Issues
-```
-Error: Error acquiring the state lock
-```
-**Solution:** Check DynamoDB for locks and remove if stale
-
-### Resource Already Exists
-```
-Error: resource already exists
-```
-**Solution:** Import existing resources or destroy and recreate
+- Always run `terraform plan` before applying changes
+- Keep `terraform.tfstate` secure (store in remote backend for teams)
+- Use `terraform output` to retrieve deployed resource information
+- Test locally before pushing to production
 
 ---
 
 ## 📚 Resources
 
 - [Terraform Documentation](https://www.terraform.io/docs)
-- [AWS Provider Documentation](https://registry.terraform.io/providers/hashicorp/aws/latest/docs)
-- [Terraform Best Practices](https://www.terraform.io/docs/cloud/guides/recommended-practices)
-- [AWS Architecture Center](https://aws.amazon.com/architecture/)
+- [AWS S3 Documentation](https://docs.aws.amazon.com/s3/)
+- [Terraform AWS Provider](https://registry.terraform.io/providers/hashicorp/aws/latest/docs)
 
 ---
 
-## 📝 License
+## 📄 License
 
-This project is licensed under the MIT License.
-
----
-
-**Happy Terraforming! 🎉**
+This project is open source and available under the MIT License.
